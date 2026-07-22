@@ -36,7 +36,7 @@ function boot() {
   fillBases();
   syncSourceNote();
 
-  UI.source.addEventListener('change', () => { syncCustom(); syncSourceNote(); });
+  UI.source.addEventListener('change', () => { syncCustom(); syncSourceNote(); syncDigits(); });
   UI.customKind.addEventListener('change', syncCustom);
   UI.base.addEventListener('change', () => { fillPairs(); syncDigits(); });
   UI.digits.addEventListener('input', () => {
@@ -48,6 +48,12 @@ function boot() {
     syncDigits();
   });
   UI.zmax.addEventListener('input', syncZ);
+  const zb = el('zHelpBtn');
+  if (zb) zb.addEventListener('click', () => {
+    const pop = el('zHelp');
+    pop.hidden = !pop.hidden;
+    zb.setAttribute('aria-expanded', String(!pop.hidden));
+  });
   UI.run.addEventListener('click', () => { run(); });
   UI.pairI.addEventListener('change', renderSwap);
   UI.pairJ.addEventListener('change', renderSwap);
@@ -148,28 +154,54 @@ function clampDigits(v) {
   return Math.max(200, Math.min(DIG_MAX, n));
 }
 
-/* Say what the run is going to cost before it is started, when it is going to
-   cost anything worth mentioning. */
+/* Say what the run is going to cost before it is started, and — when the chosen
+   source cannot go as far as the slider — say so at once rather than after the
+   run silently clamps it. The digit generators and the rationals reach twenty
+   million; the analytic constants are BigInt-bound and stop far earlier,
+   because twenty million digits of π is not minutes but hours. */
 function syncDigits() {
   const n = clampDigits(UI.digits.value);
   const b = parseInt(UI.base.value, 10) || 10;
-  const secs = estimateSeconds(b, n);
-  UI.digitsEcho.textContent = n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n.toLocaleString('en');
+  UI.digitsEcho.textContent = fmtDigits(n);
+
+  const spec = libraryById(UI.source.value);
   const warn = el('slowNote');
-  if (warn) warn.textContent = secs > 4 ? `about ${secs < 60 ? Math.round(secs) + ' s' : Math.round(secs / 60) + ' min'} of arithmetic at this size` : '';
+  if (!warn) return;
+
+  if (spec && spec.kind === 'series' && n > spec.max) {
+    warn.textContent = `${spec.name} is computed exactly and stops at ${fmtDigits(spec.max)} digits — ` +
+      `a series at ${fmtDigits(n)} would take the better part of an hour. The run will use ${fmtDigits(spec.max)}.`;
+    return;
+  }
+  const secs = estimateSeconds(b, n);
+  warn.textContent = secs > 4
+    ? `about ${secs < 60 ? Math.round(secs) + ' s' : Math.round(secs / 60) + ' min'} of arithmetic at this size`
+    : '';
+}
+
+function fmtDigits(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(n % 1e6 === 0 ? 0 : 1) + 'M';
+  return n.toLocaleString('en');
 }
 
 /* ---------- running ---------- */
 
 function setProgress(frac, label) {
   const box = el('progress');
-  box.hidden = false;
+  if (box.hidden) { box.hidden = false; progressShownAt = performance.now(); }
   el('progressFill').style.width = (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + '%';
   el('progressPct').textContent = Math.round(frac * 100) + '%';
   el('progressLabel').textContent = label;
 }
 
-function hideProgress() { el('progress').hidden = true; }
+/* Keep the bar on screen for a beat even when the run was instant, or a fast
+   computation just flashes and the reader never sees that anything happened. */
+let progressShownAt = 0;
+function hideProgress() {
+  const held = 350 - (performance.now() - progressShownAt);
+  if (held > 0) { setTimeout(() => { el('progress').hidden = true; }, held); }
+  else el('progress').hidden = true;
+}
 
 /* A rough idea of the wait, from the two things that drive it: the digits have
    to be produced once, and then read b(b−1)/2 times. Worth saying out loud
@@ -200,7 +232,7 @@ async function doRun() {
   const b = parseInt(UI.base.value, 10);
   const n = clampDigits(UI.digits.value);
   UI.digits.value = n;
-  UI.digitsSlider.value = Math.max(1000, n);
+  UI.digitsSlider.value = digitsToSlider(n);
 
   const t0 = performance.now();
 

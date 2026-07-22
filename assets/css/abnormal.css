@@ -526,6 +526,36 @@ select:focus-visible, input:focus-visible, textarea:focus-visible,
   margin-top: 0.4rem;
 }
 .progress-line b { color: var(--ink); font-weight: 700; }
+/* the percentage, large enough to read across the room */
+.progress-pct { font-variant-numeric: tabular-nums; }
+
+/* the little question mark next to a control, and the note it reveals */
+.qmark {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  line-height: 1;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--mid);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mid);
+  cursor: pointer;
+  padding: 0;
+  vertical-align: middle;
+}
+.qmark:hover, .qmark[aria-expanded="true"] { border-color: var(--hot); color: var(--hot); }
+.help-pop[hidden] { display: none !important; }
+.help-pop {
+  font-size: 0.86rem;
+  color: var(--mid);
+  max-width: 60ch;
+  border-left: 3px solid var(--cool);
+  background: var(--sheet);
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1.1rem;
+}
+.help-pop b { color: var(--ink); }
 
 /* ---------- the custom panel ---------- */
 

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ABNORMAL — compute</title>
-<meta name="description" content="Compute the swap map, the digit densities and the full Δ_b-scheme of a real number in any base from 2 to 16, up to 200000 digits.">
+<meta name="description" content="Compute the swap map, the digit densities and the full Δ_b-scheme of a real number in any base from 2 to 16, up to 20 million digits.">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2316161a'/><path d='M32 13 L52 51 H12 Z' fill='none' stroke='%23c2402a' stroke-width='4' stroke-linejoin='round'/><circle cx='24' cy='42' r='3.6' fill='%23fbfaf8'/><circle cx='40' cy='42' r='3.6' fill='%23fbfaf8'/></svg>">
-<link rel="stylesheet" href="assets/css/abnormal.css">
+<link rel="stylesheet" href="assets/css/abnormal.css?v=2">
 <script>document.documentElement.dataset.theme = (function(){try{return localStorage.getItem('abnormal-theme')||'light'}catch(e){return 'light'}})();</script>
 <script>
   window.MathJax = {
@@ -22,7 +22,7 @@
   <div class="masthead-inner">
     <div class="brand">
       <h1 class="wordmark" data-mark="2"><a href="index.html">ABNORMAL</a></h1>
-      <p class="expand">a finite test for an infinite property</p>
+      <p class="expand">a finite test every normal number must pass</p>
     </div>
     <div class="toggles">
       <button id="themeBtn" class="toggle" type="button">dark</button>
@@ -59,10 +59,21 @@
         </div>
       </div>
       <div class="ctrl">
-        <label for="zmax">Strictness <span class="echo" id="zEcho"></span></label>
+        <label for="zmax">Strictness <span class="echo" id="zEcho"></span>
+          <button type="button" class="qmark" id="zHelpBtn" aria-expanded="false" aria-controls="zHelp" title="What is this?">?</button>
+        </label>
         <input type="range" id="zmax" class="slider" min="4" max="16" step="1" value="8">
       </div>
     </div>
+
+    <p class="help-pop" id="zHelp" hidden>
+      <b>Strictness</b> is the tolerance of the verdict, in standard errors (σ). On a
+      finite prefix each density is only measured, so it never lands exactly on the
+      prescribed value; the run is called pseudonormal when no entry sits further than
+      this many σ from where it should be. Lower is more forgiving, higher is more
+      suspicious. It only affects measured (non-periodic) numbers — for a rational the
+      whole period is known and the check is exact, so the slider does nothing.
+    </p>
 
     <div class="custom-panel" id="customWrap" hidden>
       <span class="phead">Your own number</span>
@@ -108,6 +119,7 @@
 
     <section class="block">
       <h2 data-n="02">Verdict</h2>
+      <p class="lead">This is a test of <em>pseudonormality</em>, not of normality. Every normal number is pseudonormal, so a <b>no</b> is a proof that the number is <em>not</em> normal; a <b>yes</b> is necessary but not sufficient — some rationals, normal in no base at all, pass it.</p>
       <div class="verdict" id="verdict"></div>
       <p class="help" id="verdictNote"></p>
     </section>
@@ -164,11 +176,11 @@
   <span>MIT</span>
 </footer>
 
-<script src="assets/js/shell.js"></script>
+<script src="assets/js/shell.js?v=2"></script>
 <script id="MathJax-script" src="assets/vendor/tex-svg.js"></script>
-<script src="assets/js/bignum.js"></script>
-<script src="assets/js/library.js"></script>
-<script src="assets/js/scheme.js"></script>
-<script src="assets/js/compute.js"></script>
+<script src="assets/js/bignum.js?v=2"></script>
+<script src="assets/js/library.js?v=2"></script>
+<script src="assets/js/scheme.js?v=2"></script>
+<script src="assets/js/compute.js?v=2"></script>
 </body>
 </html>
