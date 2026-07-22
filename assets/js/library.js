@@ -114,106 +114,86 @@ function pseudorandom(b, n, seed) {
 
 /* kind: 'series'   — BigInt series or root, scaled
          'digits'   — generated digit by digit
-         'rational' — exact long division, period detected when it closes */
+         'rational' — exact long division, period detected when it closes
+
+   The caps are measured, not guessed. A digit generator is linear and will
+   hand over twenty million digits in about a second; a series at that scale is
+   BigInt-bound and would take the better part of an hour, so the constants
+   stop where the wait is still honest. */
 const LIBRARY = [
   {
-    id: 'pi', name: 'π', group: 'Constants', max: 200000,
+    id: 'pi', name: 'π', group: 'Constants', max: 250000,
     note: 'Believed normal in every base; not proved in any.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(piScaled(S), S, b, n); },
   },
   {
-    id: 'e', name: 'e', group: 'Constants', max: 200000,
+    id: 'e', name: 'e', group: 'Constants', max: 250000,
     note: 'Believed normal; not proved.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(eScaled(S), S, b, n); },
   },
   {
-    id: 'ln2', name: 'log 2', group: 'Constants', max: 200000,
+    id: 'ln2', name: 'log 2', group: 'Constants', max: 250000,
     note: 'Believed normal; not proved.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(ln2Scaled(S), S, b, n); },
   },
   {
-    id: 'sqrt2', name: '√2', group: 'Constants', max: 200000,
+    id: 'sqrt2', name: '√2', group: 'Constants', max: 250000,
     note: 'Algebraic irrational. No algebraic irrational has ever been proved normal in any base.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(2n * S * S), S, b, n); },
   },
   {
-    id: 'sqrt3', name: '√3', group: 'Constants', max: 200000,
+    id: 'sqrt3', name: '√3', group: 'Constants', max: 250000,
     note: 'Algebraic irrational.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(3n * S * S), S, b, n); },
   },
   {
-    id: 'sqrt5', name: '√5', group: 'Constants', max: 200000,
+    id: 'sqrt5', name: '√5', group: 'Constants', max: 250000,
     note: 'Algebraic irrational.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(5n * S * S), S, b, n); },
   },
   {
-    id: 'cbrt2', name: '∛2', group: 'Constants', max: 200000,
+    id: 'cbrt2', name: '∛2', group: 'Constants', max: 250000,
     note: 'Algebraic of degree three.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(iroot(2n * S * S * S, 3), S, b, n); },
   },
   {
-    id: 'phi', name: 'φ', group: 'Constants', max: 200000,
+    id: 'phi', name: 'φ', group: 'Constants', max: 250000,
     note: 'The golden ratio, (1+√5)/2.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits((S + isqrt(5n * S * S)) / 2n, S, b, n); },
   },
 
   {
-    id: 'champernowne', name: 'Champernowne C_b', group: 'Proved normal', max: 200000,
+    id: 'champernowne', name: 'Champernowne C_b', group: 'Proved normal', max: 20000000,
     note: 'Proved b-normal (Champernowne 1933; Nakai–Shiokawa 1992 in every base) — but it converges so slowly that the test rejects it at any prefix length you can compute here. Normality is an asymptotic statement; this is what that costs.',
     kind: 'digits', f: champernowne,
   },
   {
-    id: 'copeland', name: 'Copeland–Erdős', group: 'Proved normal', max: 200000,
+    id: 'copeland', name: 'Copeland–Erdős', group: 'Proved normal', max: 20000000,
     note: 'The primes concatenated; proved 10-normal in 1946. Like Champernowne it converges far too slowly to pass a finite test.',
     kind: 'digits', f: copelandErdos,
   },
   {
-    id: 'fibonacci', name: 'Fibonacci concatenation', group: 'Proved normal', max: 200000,
+    id: 'fibonacci', name: 'Fibonacci concatenation', group: 'Proved normal', max: 20000000,
     note: 'The paper’s F_10 = 0.1123581321345589144233…',
     kind: 'digits', f: fibonacciConcat,
   },
   {
-    id: 'random', name: 'Pseudorandom digits', group: 'Proved normal', max: 200000,
+    id: 'random', name: 'Pseudorandom digits', group: 'Proved normal', max: 20000000,
     note: 'A seeded digit stream: the control specimen, what "as expected" looks like.',
     kind: 'digits', f: (b, n) => pseudorandom(b, n, 0x5bf03635),
   },
 
   {
-    id: 'liouville', name: 'Liouville constant', group: 'Proved abnormal', max: 200000,
+    id: 'liouville', name: 'Liouville constant', group: 'Proved abnormal', max: 20000000,
     note: 'A digit 1 at each position k!, zeros everywhere else. Transcendental and grossly non-normal.',
     kind: 'digits', f: liouville,
   },
   {
-    id: 'thuemorse', name: 'Thue–Morse digits', group: 'Proved abnormal', max: 200000,
+    id: 'thuemorse', name: 'Thue–Morse digits', group: 'Proved abnormal', max: 20000000,
     note: 'Parity of the binary digit sum. In base 2 it is simply normal but not normal — it contains no cube.',
     kind: 'digits', f: thueMorse,
   },
 
-  {
-    id: 'paper-pseudo', name: '7930067⁄16843009', group: 'From the paper', max: 200000,
-    note: 'Rational, hence normal in no base, yet exactly 4-pseudonormal: pseudonormality does not imply normality.',
-    kind: 'rational', p: 7930067n, q: 16843009n, base: 4,
-  },
-  {
-    id: 'paper-base3', name: '3617⁄265720', group: 'From the paper', max: 200000,
-    note: 'Exactly 3-pseudonormal with digit densities 1/2, 1/6, 1/3 — the base-3 counterexample: in base 3 pseudonormality does not imply simple normality.',
-    kind: 'rational', p: 3617n, q: 265720n, base: 3,
-  },
-  {
-    id: 'paper-simply', name: '1224317236299537648⁄1229782938247303441', group: 'From the paper', max: 200000,
-    note: 'The periodic base-4 number 0.(33323130232221201312111003020100): simply 4-normal but not 4-pseudonormal.',
-    kind: 'rational', p: 1224317236299537648n, q: 1229782938247303441n, base: 4,
-  },
-  {
-    id: 'paper-19-62', name: '19⁄62', group: 'From the paper', max: 200000,
-    note: 'The worked example of the paper: 0.(123) in base 5.',
-    kind: 'rational', p: 19n, q: 62n, base: 5,
-  },
-  {
-    id: 'paper-5-26', name: '5⁄26', group: 'From the paper', max: 200000,
-    note: '0.(012) in base 3: simply 3-normal but not 3-pseudonormal.',
-    kind: 'rational', p: 5n, q: 26n, base: 3,
-  },
 ];
 
 function libraryById(id) { return LIBRARY.find((e) => e.id === id); }

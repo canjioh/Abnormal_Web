@@ -24,6 +24,7 @@ function boot() {
   UI.digitsSlider = el('digitsSlider');
   UI.zmax = el('zmax');
   UI.zEcho = el('zEcho');
+  UI.digitsEcho = el('digitsEcho');
   UI.run = el('run');
   UI.notice = el('notice');
   UI.note = el('sourceNote');
@@ -37,21 +38,32 @@ function boot() {
 
   UI.source.addEventListener('change', () => { syncCustom(); syncSourceNote(); });
   UI.customKind.addEventListener('change', syncCustom);
-  UI.base.addEventListener('change', fillPairs);
-  UI.digits.addEventListener('input', () => { UI.digitsSlider.value = clampDigits(UI.digits.value); });
-  UI.digitsSlider.addEventListener('input', () => { UI.digits.value = UI.digitsSlider.value; });
+  UI.base.addEventListener('change', () => { fillPairs(); syncDigits(); });
+  UI.digits.addEventListener('input', () => {
+    UI.digitsSlider.value = digitsToSlider(clampDigits(UI.digits.value));
+    syncDigits();
+  });
+  UI.digitsSlider.addEventListener('input', () => {
+    UI.digits.value = sliderToDigits(parseInt(UI.digitsSlider.value, 10));
+    syncDigits();
+  });
   UI.zmax.addEventListener('input', syncZ);
-  UI.run.addEventListener('click', run);
+  UI.run.addEventListener('click', () => { run(); });
   UI.pairI.addEventListener('change', renderSwap);
   UI.pairJ.addEventListener('change', renderSwap);
   el('csv').addEventListener('click', downloadCsv);
 
   syncCustom();
   syncZ();
+  UI.digitsSlider.value = digitsToSlider(clampDigits(UI.digits.value));
+  syncDigits();
   fillPairs();
   run();
 }
 
+/* Your own number first, the specimens after it: the point of the page is the
+   number you brought, and the catalogue is there to have something to compare
+   it with. */
 function fillSources() {
   const groups = [];
   for (const e of LIBRARY) {
@@ -59,15 +71,28 @@ function fillSources() {
     if (!g) { g = { name: e.group, items: [] }; groups.push(g); }
     g.items.push(e);
   }
-  let html = '';
+  let html = '<optgroup label="Your own number">' +
+    '<option value="custom">▸ type a fraction or a digit string…</option></optgroup>';
   for (const g of groups) {
     html += `<optgroup label="${g.name}">`;
     for (const e of g.items) html += `<option value="${e.id}">${e.name}</option>`;
     html += '</optgroup>';
   }
-  html += '<optgroup label="Your own"><option value="custom">Custom input…</option></optgroup>';
   UI.source.innerHTML = html;
   UI.source.value = 'pi';
+}
+
+/* The useful range spans four decades, so a linear slider would spend nine
+   tenths of its travel between ten and twenty million. */
+const DIG_MIN = 1000, DIG_MAX = 20000000;
+function sliderToDigits(v) {
+  const t = v / 1000;
+  const d = Math.pow(10, Math.log10(DIG_MIN) + t * (Math.log10(DIG_MAX) - Math.log10(DIG_MIN)));
+  return Math.max(200, Math.round(d / 100) * 100);
+}
+function digitsToSlider(n) {
+  const t = (Math.log10(Math.max(DIG_MIN, n)) - Math.log10(DIG_MIN)) / (Math.log10(DIG_MAX) - Math.log10(DIG_MIN));
+  return Math.round(Math.max(0, Math.min(1, t)) * 1000);
 }
 
 function fillBases() {
@@ -120,38 +145,67 @@ function strictness() {
 function clampDigits(v) {
   let n = parseInt(v, 10);
   if (!isFinite(n)) n = 50000;
-  return Math.max(200, Math.min(200000, n));
+  return Math.max(200, Math.min(DIG_MAX, n));
+}
+
+/* Say what the run is going to cost before it is started, when it is going to
+   cost anything worth mentioning. */
+function syncDigits() {
+  const n = clampDigits(UI.digits.value);
+  const b = parseInt(UI.base.value, 10) || 10;
+  const secs = estimateSeconds(b, n);
+  UI.digitsEcho.textContent = n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n.toLocaleString('en');
+  const warn = el('slowNote');
+  if (warn) warn.textContent = secs > 4 ? `about ${secs < 60 ? Math.round(secs) + ' s' : Math.round(secs / 60) + ' min'} of arithmetic at this size` : '';
 }
 
 /* ---------- running ---------- */
 
-function run() {
+function setProgress(frac, label) {
+  const box = el('progress');
+  box.hidden = false;
+  el('progressFill').style.width = (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + '%';
+  el('progressPct').textContent = Math.round(frac * 100) + '%';
+  el('progressLabel').textContent = label;
+}
+
+function hideProgress() { el('progress').hidden = true; }
+
+/* A rough idea of the wait, from the two things that drive it: the digits have
+   to be produced once, and then read b(b−1)/2 times. Worth saying out loud
+   before a run that is going to take a minute. */
+function estimateSeconds(b, n) {
+  return (b * (b - 1) / 2) * n * 1.1e-6 / 45;
+}
+
+async function run() {
   UI.notice.textContent = '';
   UI.run.disabled = true;
   UI.run.textContent = 'working…';
-  // A timeout rather than requestAnimationFrame: rAF never fires in a
-  // background tab, and the run would then wait for the user to come back.
-  void UI.run.offsetWidth;
-  setTimeout(() => {
-    try {
-      doRun();
-    } catch (err) {
-      UI.notice.textContent = err && err.message ? err.message : String(err);
-      UI.results.hidden = true;
-    } finally {
-      UI.run.disabled = false;
-      UI.run.textContent = 'compute';
-    }
-  }, 0);
+  setProgress(0, 'starting');
+  await new Promise((r) => setTimeout(r, 0));
+  try {
+    await doRun();
+  } catch (err) {
+    UI.notice.textContent = err && err.message ? err.message : String(err);
+    UI.results.hidden = true;
+  } finally {
+    UI.run.disabled = false;
+    UI.run.textContent = 'compute';
+    hideProgress();
+  }
 }
 
-function doRun() {
+async function doRun() {
   const b = parseInt(UI.base.value, 10);
   const n = clampDigits(UI.digits.value);
   UI.digits.value = n;
   UI.digitsSlider.value = Math.max(1000, n);
 
   const t0 = performance.now();
+
+  setProgress(0.02, 'producing the digits');
+  await new Promise((r) => setTimeout(r, 0));
   const built = buildSource(b, n);
   const source = built.source;
 
@@ -160,8 +214,14 @@ function doRun() {
   if (source.length < 2) throw new Error('Nothing to work with: at least two digits are needed.');
   if (!built.exact && source.length < 50) throw new Error('Too few digits to measure anything: give at least 50.');
 
-  const an = analyse(source, b, built.exact, strictness());
+  const pairs = b * (b - 1) / 2;
+  const an = await analyse(source, b, built.exact, strictness(), (f) => {
+    setProgress(0.1 + 0.85 * f, `pair ${Math.round(f * pairs)} of ${pairs} · ${source.length.toLocaleString('en')} digits`);
+  });
   const ms = performance.now() - t0;
+
+  setProgress(0.97, 'drawing');
+  await new Promise((r) => setTimeout(r, 0));
 
   LAST = { b, n, an, built, ms };
   UI.results.hidden = false;
@@ -403,19 +463,21 @@ function renderFrequencies() {
 function renderScheme() {
   const { b, an } = LAST;
   const zmax = strictness();
-  let head = '<tr><th>i</th><th>j</th><th>δ</th>';
+  let head = '<tr><th class="idx idx-i">i</th><th class="idx idx-j">j</th><th class="idx idx-d">δ</th>';
   for (let h = 0; h < b; h++) head += `<th>P[${digitToChar(h)}]</th>`;
-  head += `<th>${an.exact ? 'dev' : 'max σ'}</th></tr>`;
+  head += `<th class="tot">${an.exact ? 'dev' : 'max σ'}</th></tr>`;
 
   let body = '';
   for (const r of an.rows) {
     if (r.trivial) {
-      body += `<tr><th>${digitToChar(r.i)}</th><td>${digitToChar(r.j)}</td><td>${r.delta}</td>` +
+      body += `<tr><th class="idx idx-i">${digitToChar(r.i)}</th><td class="idx idx-j">${digitToChar(r.j)}</td>` +
+        `<td class="idx idx-d">${r.delta}</td>` +
         `<td colspan="${b + 1}" class="zero">σ fixes ω — line omitted</td></tr>`;
       continue;
     }
     const bad = an.exact ? !r.score.exactMatch : r.score.z > zmax;
-    body += `<tr${bad ? ' class="bad"' : ''}><th>${digitToChar(r.i)}</th><td>${digitToChar(r.j)}</td><td>${r.delta}</td>`;
+    body += `<tr${bad ? ' class="bad"' : ''}><th class="idx idx-i">${digitToChar(r.i)}</th>` +
+      `<td class="idx idx-j">${digitToChar(r.j)}</td><td class="idx idx-d">${r.delta}</td>`;
     for (let h = 0; h < b; h++) {
       const target = r.expected[h] / (2 * b);
       const diff = r.freq[h] - target;
@@ -432,7 +494,7 @@ function renderScheme() {
         : `prescribed ${fmt(target)} — off by ${fmtZ(r.score.zs ? r.score.zs[h] : 0)} σ`;
       body += `<td class="${cls}"${tint(diff, weight)} title="${title}">${miss ? caret(diff) : ''}${fmt(r.freq[h])}</td>`;
     }
-    body += `<td>${an.exact ? fmt(r.score.dev, 6) : fmtZ(r.score.z)}</td></tr>`;
+    body += `<td class="tot">${an.exact ? fmt(r.score.dev, 6) : fmtZ(r.score.z)}</td></tr>`;
   }
 
   el('schemeTable').innerHTML =
@@ -446,13 +508,13 @@ function renderDelta() {
   const { b, an } = LAST;
   const rows = collapseByDelta(an.rows, b);
 
-  let head = '<tr><th>δ</th>';
+  let head = '<tr><th class="idx idx-i">δ</th>';
   for (let h = 0; h < b; h++) head += `<th>P[${digitToChar(h)}]</th>`;
   head += '</tr>';
 
   let obs = '';
   for (const r of rows) {
-    obs += `<tr><th>${r.delta}</th>`;
+    obs += `<tr><th class="idx idx-i">${r.delta}</th>`;
     for (let h = 0; h < b; h++) {
       const target = r.expected[h] / (2 * b);
       const diff = r.freq[h] - target;
@@ -466,7 +528,7 @@ function renderDelta() {
   let exp = '';
   for (let delta = 1; delta <= b - 1; delta++) {
     const u = expectedUnits(b, delta);
-    exp += `<tr><th>${delta}</th>`;
+    exp += `<tr><th class="idx idx-i">${delta}</th>`;
     for (let h = 0; h < b; h++) {
       exp += `<td class="${u[h] === 0 ? 'zero' : ''}" title="${u[h]}/${2 * b}">${fmt(u[h] / (2 * b))}</td>`;
     }

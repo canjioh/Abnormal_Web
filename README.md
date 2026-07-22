@@ -3,7 +3,7 @@
 **A finite test for an infinite property**
 
 A calculator that runs entirely in the browser. Pick a number, pick a base up to
-16 and a length up to 200 000 digits, and ABNORMAL builds the swap maps
+16 and a length up to 20 million digits, and ABNORMAL builds the swap maps
 σ<sup>i,j</sup>, the differences Δ<sub>b</sub><sup>i,j</sup>(ω) = ω −
 σ<sup>i,j</sup>(ω), the digit densities and the full Δ<sub>b</sub>-scheme — then
 reads it against the scheme every *b*-normal number is forced to have.
@@ -47,10 +47,15 @@ The whole table is exportable as CSV.
 * **Proved normal** — Champernowne in any base, Copeland–Erdős, the Fibonacci
   concatenation, and a seeded pseudorandom stream as a control.
 * **Proved abnormal** — Liouville's constant, the Thue–Morse digits.
-* **From the paper** — the rationals that separate the classes, including the
-  4-pseudonormal 7930067/16843009 and the base-3 counterexample 3617/265720.
 * **Your own** — any fraction *p*/*q*, or a digit string, optionally read as a
-  repeating period.
+  repeating period. This is the first entry in the menu, because it is the point
+  of the page.
+
+The rationals that separate the classes are on the theory page rather than in
+the menu — paste them into the custom field to see the separations happen:
+`7930067/16843009` in base 4 (pseudonormal, not normal), `3617/265720` in base 3
+(pseudonormal, not even simply normal), `5/26` in base 3 (simply normal, not
+pseudonormal).
 
 ## Honesty about the numbers
 
@@ -118,12 +123,24 @@ assets/vendor/tex-svg.js  MathJax, vendored — nothing is fetched at runtime
 Everything is synchronous; at the top setting the wait is a couple of seconds.
 Measured in Chrome on a laptop:
 
+The digits are produced once and then read *b*(*b*−1)/2 times, so the base costs
+as much as the length. A run reports its own progress, pair by pair, and says
+beforehand what it is going to cost.
+
 | Run | Time |
 |---|---|
 | π, base 10, 50 000 digits | ~0.5 s |
-| π, base 16, 200 000 digits | ~3 s |
-| e, base 10, 200 000 digits | ~0.7 s |
+| Champernowne, base 4, 20 000 000 digits | ~3 s |
+| pseudorandom, base 10, 5 000 000 digits | ~5 s |
+| pseudorandom, base 16, 20 000 000 digits | ~1 min |
 | 7930067/16843009, base 10, exact over its 65 536-digit period | ~0.1 s |
+
+The caps in the menu are measured, not guessed, and they differ by kind. A digit
+generator is linear and hands over twenty million digits in about a second; the
+long division for a rational is nearly as fast. The analytic constants are
+BigInt-bound and stop at **250 000** digits, which is a few seconds — twenty
+million of them would be the better part of an hour, and pretending otherwise
+would only produce a frozen tab.
 
 The series are summed by binary splitting rather than term by term. Adding terms
 one at a time is quadratic and puts a ceiling of a few thousand digits on the

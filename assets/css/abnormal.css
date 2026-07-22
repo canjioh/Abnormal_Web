@@ -52,7 +52,7 @@
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --sans: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
   --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', 'DejaVu Sans Mono', Menlo, Consolas, monospace;
-  --measure: 66ch;
+  --measure: 100%;
   --gutter: clamp(1rem, 3.5vw, 2.6rem);
   --frame: 1220px;
 }
@@ -110,10 +110,9 @@ body {
 /* One letter per page is set in vermilion — the site's own index of where you
    are, costing no extra ink and no extra widget. On load the colour rolls
    through the word like an odometer wheel and settles on that letter. */
-.wordmark .ltr.neg { color: var(--hot); transform: translateY(-0.06em); }
+.wordmark .ltr.neg { color: var(--hot); }
 @media (prefers-reduced-motion: reduce) {
-  .wordmark .ltr { transition: none; transform: none; }
-  .wordmark .ltr.neg { transform: none; }
+  .wordmark .ltr { transition: none; }
 }
 .expand {
   font-family: var(--sans);
@@ -207,6 +206,14 @@ body {
   transition: opacity 260ms ease, transform 260ms ease, color 260ms ease;
 }
 .hdigits b.in { opacity: 1; transform: none; }
+/* the integer part and the point, which arrive with their row */
+.hdigits .head {
+  font-style: normal;
+  color: var(--mid);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+.hdigits .head.in { opacity: 1; }
 .hdigits b.sw { color: var(--hot); font-weight: 700; }
 .hdigits b.hi { color: var(--cool); font-weight: 700; }
 .hdigits b.lo { color: var(--faint); }
@@ -498,6 +505,49 @@ select:focus-visible, input:focus-visible, textarea:focus-visible,
   text-align: left;
 }
 
+/* ---------- progress ---------- */
+
+/* A twenty-million-digit run is a minute of arithmetic; a spinner would say
+   nothing about how much of it is left, so this says the number. */
+.progress[hidden] { display: none !important; }
+.progress {
+  margin: 1rem 0 0;
+  max-width: 40rem;
+}
+.progress-track { height: 6px; background: var(--wash); border: 1px solid var(--hair); overflow: hidden; }
+.progress-fill { height: 100%; width: 0; background: var(--hot); transition: width 140ms linear; }
+.progress-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mid);
+  margin-top: 0.4rem;
+}
+.progress-line b { color: var(--ink); font-weight: 700; }
+
+/* ---------- the custom panel ---------- */
+
+.custom-panel {
+  border: 1px solid var(--hot);
+  border-left-width: 4px;
+  background: var(--sheet);
+  padding: 1rem 1.1rem;
+  margin: 0 0 1.1rem;
+}
+.custom-panel > .phead {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hot-ink);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.8rem;
+}
+.custom-panel .controls { margin-bottom: 0; }
+
 /* ---------- verdict ---------- */
 
 .verdict {
@@ -552,32 +602,47 @@ table.grid { border-collapse: collapse; font-variant-numeric: tabular-nums; widt
 table.grid th, table.grid td {
   font-family: var(--mono);
   font-size: 0.78rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0.32rem 0.62rem;
   border-bottom: 1px solid var(--hair);
   text-align: right;
   white-space: nowrap;
 }
 table.grid thead th {
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--mid);
+  /* no uppercasing here: these headers are mathematical symbols, and an
+     upper-case i is a different letter from the i in the text */
+  letter-spacing: 0;
+  color: var(--ink);
   border-bottom: 2px solid var(--rule);
   background: var(--sheet);
   position: sticky;
   top: 0;
+  z-index: 2;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
-table.grid tbody th { font-weight: 700; text-align: left; color: var(--ink); }
+table.grid thead th.idx, table.grid tbody td.idx, table.grid tbody th.idx { text-align: center; }
+/* the index block travels with the reader across a sixteen-column table */
+table.grid .idx { position: sticky; background: var(--sheet); z-index: 1; }
+table.grid th.idx-i, table.grid td.idx-i { left: 0; }
+table.grid th.idx-j, table.grid td.idx-j { left: 2.6rem; }
+table.grid th.idx-d, table.grid td.idx-d { left: 5.2rem; border-right: 2px solid var(--rule); }
+table.grid thead th.idx { z-index: 3; }
+table.grid tbody th { font-weight: 700; text-align: center; color: var(--ink); }
+/* Banding lives on the index block only: in the data field it would compete
+   with the heat map, which is the thing the reader is actually meant to see. */
+table.grid tbody tr:nth-child(even) .idx { background: var(--wash); }
 table.grid td.zero { color: var(--faint); }
 /* the two directions of a miss, said twice: colour and a caret */
 table.grid td.over { color: var(--hot-ink); font-weight: 700; }
 table.grid td.under { color: var(--cool-ink); font-weight: 700; }
-table.grid tr.bad > th:first-child { box-shadow: inset 3px 0 0 var(--hot); }
-table.grid tr:hover td, table.grid tr:hover th { background: var(--wash); }
+table.grid tr.bad .idx-i { box-shadow: inset 3px 0 0 var(--hot); }
+table.grid tbody tr:hover td, table.grid tbody tr:hover th { background: var(--wash); }
+table.grid td.tot { border-left: 1px solid var(--hair); }
 table.grid caption {
   font-family: var(--sans);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--mid);
   text-align: left;
   padding: 0.6rem 0.6rem 0.7rem;

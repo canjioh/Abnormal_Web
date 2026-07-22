@@ -21,7 +21,7 @@
 <header class="masthead">
   <div class="masthead-inner">
     <div class="brand">
-      <h1 class="wordmark" data-mark="7"><a href="index.html">ABNORMAL</a></h1>
+      <h1 class="wordmark" data-mark="2"><a href="index.html">ABNORMAL</a></h1>
       <p class="expand">a finite test for an infinite property</p>
     </div>
     <div class="toggles">
@@ -40,7 +40,7 @@
 <main>
 
   <section class="block">
-    <h2 data-n="01">Input <span class="tag">bases <b>2 – 16</b> · up to <b>200 000</b> digits</span></h2>
+    <h2 data-n="01">Input <span class="tag">bases <b>2 – 16</b> · up to <b>20 000 000</b> digits</span></h2>
 
     <div class="controls">
       <div class="ctrl">
@@ -52,10 +52,10 @@
         <select id="base"></select>
       </div>
       <div class="ctrl">
-        <label for="digits">Digits</label>
+        <label for="digits">Digits <span class="echo" id="digitsEcho"></span></label>
         <div class="inline">
-          <input type="number" id="digits" value="50000" min="200" max="200000" step="1000">
-          <input type="range" id="digitsSlider" class="slider" min="1000" max="200000" step="1000" value="50000">
+          <input type="number" id="digits" value="50000" min="200" max="20000000" step="1000">
+          <input type="range" id="digitsSlider" class="slider" min="0" max="1000" step="1" value="0">
         </div>
       </div>
       <div class="ctrl">
@@ -64,32 +64,41 @@
       </div>
     </div>
 
-    <div class="controls" id="customWrap" hidden>
-      <div class="ctrl">
-        <label for="customKind">Custom input</label>
-        <select id="customKind">
-          <option value="rational">Fraction p/q</option>
-          <option value="digits">Digit string</option>
-        </select>
-      </div>
-      <div class="ctrl span2">
-        <label for="customText">Value</label>
-        <textarea id="customText" spellcheck="false"></textarea>
-      </div>
-      <div class="ctrl" id="cyclicWrap" hidden>
-        <label for="customCyclic">Repeating</label>
-        <div class="inline">
-          <input type="checkbox" id="customCyclic" style="width:auto">
-          <span class="help" style="margin:0">treat the string as one period — makes the answer exact</span>
+    <div class="custom-panel" id="customWrap" hidden>
+      <span class="phead">Your own number</span>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="customKind">Read it as</label>
+          <select id="customKind">
+            <option value="rational">Fraction p/q</option>
+            <option value="digits">Digit string</option>
+          </select>
+        </div>
+        <div class="ctrl span2">
+          <label for="customText">Value</label>
+          <textarea id="customText" spellcheck="false"></textarea>
+        </div>
+        <div class="ctrl" id="cyclicWrap" hidden>
+          <label for="customCyclic">Repeating</label>
+          <div class="inline">
+            <input type="checkbox" id="customCyclic" style="width:auto">
+            <span class="help" style="margin:0">treat the string as one period — makes the answer exact</span>
+          </div>
         </div>
       </div>
     </div>
 
     <p class="help" id="sourceNote"></p>
+    <p class="help" id="slowNote" style="color:var(--hot-ink)"></p>
 
     <div class="row-actions">
       <button class="btn" id="run" type="button">compute</button>
       <button class="btn ghost" id="csv" type="button">download csv</button>
+    </div>
+
+    <div class="progress" id="progress" hidden>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-line"><span id="progressLabel"></span><b id="progressPct">0%</b></div>
     </div>
 
     <p class="notice" id="notice"></p>

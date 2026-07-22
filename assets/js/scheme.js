@@ -129,36 +129,58 @@ function batchError(blockFreq, K, b) {
   return se;
 }
 
-/* The full scheme: one line per unordered pair of distinct digits. */
-function buildScheme(source, b, exact) {
-  const rows = [];
-  const total = source.length;
-  const K = exact ? 0 : blockCount(total);
-  for (let i = 0; i < b; i++) {
-    for (let j = i + 1; j < b; j++) {
-      const d = exact ? deltaCyclic(source, b, i, j) : deltaPrefix(source, b, i, j);
-      const delta = j - i;
-      if (d === null) {
-        rows.push({ i, j, delta, trivial: true, counts: null, freq: null, se: null, expected: expectedUnits(b, delta) });
-        continue;
-      }
-      const counts = digitCounts(d, b);
-      const freq = new Float64Array(b);
-      for (let h = 0; h < b; h++) freq[h] = counts[h] / total;
+/* The full scheme: one line per unordered pair of distinct digits.
 
-      let se = null;
-      if (K) {
-        const blockFreq = new Float64Array(K * b);
-        const size = Math.floor(total / K);
-        for (let k = 0; k < K; k++) {
-          const from = k * size;
-          const to = k === K - 1 ? total : from + size;
-          for (let t = from; t < to; t++) blockFreq[k * b + d[t]]++;
-          for (let h = 0; h < b; h++) blockFreq[k * b + h] /= (to - from);
-        }
-        se = batchError(blockFreq, K, b);
-      }
-      rows.push({ i, j, delta, trivial: false, counts, freq, se, expected: expectedUnits(b, delta), total });
+   At twenty million digits and base 16 this is a hundred and twenty passes over
+   twenty million entries, which is a minute of arithmetic. A minute during
+   which the page is frozen and says nothing is not acceptable, so the loop
+   hands control back to the browser between pairs and reports how far along it
+   is. The work is identical; only the blocking is gone. */
+function buildRow(source, b, exact, i, j, K) {
+  const total = source.length;
+  const d = exact ? deltaCyclic(source, b, i, j) : deltaPrefix(source, b, i, j);
+  const delta = j - i;
+  if (d === null) {
+    return { i, j, delta, trivial: true, counts: null, freq: null, se: null, expected: expectedUnits(b, delta) };
+  }
+  const counts = digitCounts(d, b);
+  const freq = new Float64Array(b);
+  for (let h = 0; h < b; h++) freq[h] = counts[h] / total;
+
+  let se = null;
+  if (K) {
+    const blockFreq = new Float64Array(K * b);
+    const size = Math.floor(total / K);
+    for (let k = 0; k < K; k++) {
+      const from = k * size;
+      const to = k === K - 1 ? total : from + size;
+      for (let t = from; t < to; t++) blockFreq[k * b + d[t]]++;
+      for (let h = 0; h < b; h++) blockFreq[k * b + h] /= (to - from);
+    }
+    se = batchError(blockFreq, K, b);
+  }
+  return { i, j, delta, trivial: false, counts, freq, se, expected: expectedUnits(b, delta), total };
+}
+
+function pairsOf(b) {
+  const out = [];
+  for (let i = 0; i < b; i++) for (let j = i + 1; j < b; j++) out.push([i, j]);
+  return out;
+}
+
+const yieldToPage = () => new Promise((r) => setTimeout(r, 0));
+
+async function buildSchemeAsync(source, b, exact, onProgress) {
+  const rows = [];
+  const K = exact ? 0 : blockCount(source.length);
+  const pairs = pairsOf(b);
+  // one yield per pair once a pair is expensive, otherwise a handful at a time
+  const every = source.length > 400000 ? 1 : Math.ceil(24 / b);
+  for (let p = 0; p < pairs.length; p++) {
+    rows.push(buildRow(source, b, exact, pairs[p][0], pairs[p][1], K));
+    if (p % every === every - 1 || p === pairs.length - 1) {
+      if (onProgress) onProgress((p + 1) / pairs.length);
+      await yieldToPage();
     }
   }
   return rows;
@@ -228,9 +250,9 @@ function digitReport(source, b, exact) {
    only through δ, and that it be the prescribed line. The first is worth
    reporting separately — Example 4.9 of the paper fails precisely there, with
    the (0,1) and (1,2) lines disagreeing while each looks innocent alone. */
-function analyse(source, b, exact, zmax) {
+async function analyse(source, b, exact, zmax, onProgress) {
   const digits = digitReport(source, b, exact);
-  const rows = buildScheme(source, b, exact);
+  const rows = await buildSchemeAsync(source, b, exact, onProgress);
   for (const r of rows) r.score = scoreRow(r, b);
 
   let maxDev = 0, worstRow = null, maxZ = 0, worstZRow = null;
