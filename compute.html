@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABNORMAL — compute</title>
+<meta name="description" content="Compute the swap map, the digit densities and the full Δ_b-scheme of a real number in any base from 2 to 16, up to 200000 digits.">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2316161a'/><path d='M32 13 L52 51 H12 Z' fill='none' stroke='%23c2402a' stroke-width='4' stroke-linejoin='round'/><circle cx='24' cy='42' r='3.6' fill='%23fbfaf8'/><circle cx='40' cy='42' r='3.6' fill='%23fbfaf8'/></svg>">
+<link rel="stylesheet" href="assets/css/abnormal.css">
+<script>document.documentElement.dataset.theme = (function(){try{return localStorage.getItem('abnormal-theme')||'light'}catch(e){return 'light'}})();</script>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { menuOptions: { settings: { inTabOrder: false } } },
+  };
+</script>
+</head>
+<body class="page-compute">
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <h1 class="wordmark" data-mark="7"><a href="index.html">ABNORMAL</a></h1>
+      <p class="expand">a finite test for an infinite property</p>
+    </div>
+    <div class="toggles">
+      <button id="themeBtn" class="toggle" type="button">dark</button>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="theory.html">Theory</a>
+      <a href="compute.html">Compute</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="block">
+    <h2 data-n="01">Input <span class="tag">bases <b>2 – 16</b> · up to <b>200 000</b> digits</span></h2>
+
+    <div class="controls">
+      <div class="ctrl">
+        <label for="source">Number</label>
+        <select id="source"></select>
+      </div>
+      <div class="ctrl">
+        <label for="base">Base <i>b</i></label>
+        <select id="base"></select>
+      </div>
+      <div class="ctrl">
+        <label for="digits">Digits</label>
+        <div class="inline">
+          <input type="number" id="digits" value="50000" min="200" max="200000" step="1000">
+          <input type="range" id="digitsSlider" class="slider" min="1000" max="200000" step="1000" value="50000">
+        </div>
+      </div>
+      <div class="ctrl">
+        <label for="zmax">Strictness <span class="echo" id="zEcho"></span></label>
+        <input type="range" id="zmax" class="slider" min="4" max="16" step="1" value="8">
+      </div>
+    </div>
+
+    <div class="controls" id="customWrap" hidden>
+      <div class="ctrl">
+        <label for="customKind">Custom input</label>
+        <select id="customKind">
+          <option value="rational">Fraction p/q</option>
+          <option value="digits">Digit string</option>
+        </select>
+      </div>
+      <div class="ctrl span2">
+        <label for="customText">Value</label>
+        <textarea id="customText" spellcheck="false"></textarea>
+      </div>
+      <div class="ctrl" id="cyclicWrap" hidden>
+        <label for="customCyclic">Repeating</label>
+        <div class="inline">
+          <input type="checkbox" id="customCyclic" style="width:auto">
+          <span class="help" style="margin:0">treat the string as one period — makes the answer exact</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="help" id="sourceNote"></p>
+
+    <div class="row-actions">
+      <button class="btn" id="run" type="button">compute</button>
+      <button class="btn ghost" id="csv" type="button">download csv</button>
+    </div>
+
+    <p class="notice" id="notice"></p>
+  </section>
+
+  <div id="results" hidden>
+
+    <section class="block">
+      <h2 data-n="02">Verdict</h2>
+      <div class="verdict" id="verdict"></div>
+      <p class="help" id="verdictNote"></p>
+    </section>
+
+    <section class="block">
+      <h2 data-n="03">The swap map <span class="tag">\(\sigma^{i,j}_{(b)}\) and \(\Delta_b^{\,i,j}\)</span></h2>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="pairI">Digit <i>i</i></label>
+          <select id="pairI"></select>
+        </div>
+        <div class="ctrl">
+          <label for="pairJ">Digit <i>j</i></label>
+          <select id="pairJ"></select>
+        </div>
+      </div>
+      <div class="permrow" id="perm"></div>
+      <div class="strips" id="strips"></div>
+      <div id="swapMeta"></div>
+      <p class="help">The two digits being exchanged are set in vermilion. The third row is the difference: it draws on at most six digits, whatever the number and whatever the base, and the rare ones — the digits other than \(0\) and \(b-1\) — are picked out in indigo.</p>
+    </section>
+
+    <section class="block">
+      <h2 data-n="04">Digit densities</h2>
+      <div class="bars" id="bars"></div>
+      <p class="help" id="freqNote"></p>
+    </section>
+
+    <section class="block">
+      <h2 data-n="05">The scheme <span class="tag">\(\Delta_b\) — one line per pair</span></h2>
+      <div class="tablewrap"><table class="grid" id="schemeTable"></table></div>
+      <div class="legend">
+        <span><span class="swatch hot"></span>above the prescribed value ▲</span>
+        <span><span class="swatch cool"></span>below the prescribed value ▼</span>
+        <span>intensity ∝ standard errors</span>
+      </div>
+      <p class="help">A number is pseudonormal when every line matches the prescribed one <em>and</em> lines with equal \(\delta\) agree with each other. Failing the second while passing the first is possible, and is how simply normal numbers that are not pseudonormal get caught.</p>
+    </section>
+
+    <section class="block">
+      <h2 data-n="06">Observed against prescribed <span class="tag">collapsed by \(\delta\)</span></h2>
+      <div class="tablewrap"><table class="grid" id="deltaObs"></table></div>
+      <div class="tablewrap" style="margin-top:1.2rem"><table class="grid" id="deltaExp"></table></div>
+      <p class="help">The lower table is the scheme every \(b\)-normal number must have: \(\mathbb{P}[\delta] = \mathbb{P}[b-\delta] = \mathbb{P}[\delta-1] = \mathbb{P}[b-\delta-1] = \tfrac{1}{2b}\) and \(\mathbb{P}[b-1] = \mathbb{P}[0] = \tfrac{b-2}{2b}\), with coinciding digits added. Hover an entry to read it as an exact fraction over \(2b\).</p>
+    </section>
+
+  </div>
+
+</main>
+
+<footer>
+  <span class="fmark">ABNORMAL</span>
+  <span><a href="https://arxiv.org/abs/2102.05925">arXiv:2102.05925</a></span>
+  <span>MIT</span>
+</footer>
+
+<script src="assets/js/shell.js"></script>
+<script id="MathJax-script" src="assets/vendor/tex-svg.js"></script>
+<script src="assets/js/bignum.js"></script>
+<script src="assets/js/library.js"></script>
+<script src="assets/js/scheme.js"></script>
+<script src="assets/js/compute.js"></script>
+</body>
+</html>

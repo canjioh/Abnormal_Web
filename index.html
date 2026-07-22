@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABNORMAL — a finite test for an infinite property</title>
+<meta name="description" content="Compute the Δ_b-scheme of a real number in any base up to 16 and test it for pseudonormality: a finitely checkable necessary condition for normality.">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2316161a'/><path d='M32 13 L52 51 H12 Z' fill='none' stroke='%23c2402a' stroke-width='4' stroke-linejoin='round'/><circle cx='24' cy='42' r='3.6' fill='%23fbfaf8'/><circle cx='40' cy='42' r='3.6' fill='%23fbfaf8'/></svg>">
+<link rel="stylesheet" href="assets/css/abnormal.css">
+<script>document.documentElement.dataset.theme = (function(){try{return localStorage.getItem('abnormal-theme')||'light'}catch(e){return 'light'}})();</script>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { menuOptions: { settings: { inTabOrder: false } } },
+  };
+</script>
+</head>
+<body class="page-home">
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <h1 class="wordmark" data-mark="0">ABNORMAL</h1>
+      <p class="expand">a finite test for an infinite property</p>
+    </div>
+    <div class="toggles">
+      <button id="themeBtn" class="toggle" type="button">dark</button>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="theory.html">Theory</a>
+      <a href="compute.html">Compute</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div id="hero"></div>
+  <p class="hero-caption">
+    <span><b>π</b> in base 10</span>
+    <span><span class="key hot"></span>the two digits exchanged</span>
+    <span><span class="key cool"></span>what the borrows leave</span>
+    <span class="dim">click to replay</span>
+  </p>
+</section>
+
+<div class="lede">
+  <p class="lede-1">Deciding whether a number is normal takes infinitely many checks. Deciding whether it is <em>pseudonormal</em> takes one table.</p>
+  <p class="lede-2">Swap two digits throughout the base-\(b\) expansion of a real number, then subtract the result from the original. Whatever the number, only six digits can survive the subtraction — and if the number is normal, their densities are forced to the last decimal. That forced table is the \(\Delta_b\)-scheme, and this site computes it: for the constants, for your own numbers, and in every base up to sixteen.</p>
+</div>
+
+<main>
+
+  <section class="block">
+    <h2 data-n="01">Two ways in</h2>
+    <div class="doors">
+      <a class="door" href="theory.html">
+        <span class="door-num">01</span>
+        <h2>Theory</h2>
+        <p>Normal, simply normal, Borel and pseudonormal numbers; the swap map, the six admissible digits of the difference, and where each class sits inside the next.</p>
+        <span class="door-go">Read →</span>
+      </a>
+      <a class="door" href="compute.html">
+        <span class="door-num">02</span>
+        <h2>Compute</h2>
+        <p>Pick a constant or type your own number, choose a base up to 16 and a length up to 200 000 digits, and get the swap map, the densities and the full scheme.</p>
+        <span class="door-go">Open →</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 data-n="02">What it computes</h2>
+    <p class="lead">For a base \(b\) and two digits \(i \neq j\), the swap map \(\sigma^{i,j}_{(b)}\) exchanges \(i\) and \(j\) everywhere in the expansion, and what is left is</p>
+    <div class="eqbox">\[ \Delta_b^{\,i,j}(\omega) \;=\; \omega - \sigma^{i,j}_{(b)}(\omega). \]</div>
+    <p>The site builds the entire table of digit densities of those differences — one line for each of the \(b(b-1)/2\) pairs — and reads it against the line that normality forces.</p>
+    <div class="triptych">
+      <article>
+        <h3>The map</h3>
+        <p>The permutation of the digit alphabet, and the three expansions in register: the number, its swap, and the difference. The collapse from \(b\) symbols down to six is visible on the strip itself.</p>
+      </article>
+      <article>
+        <h3>The table</h3>
+        <p>The scheme as a heat map. Vermilion where an entry sits above the prescribed value, indigo where it sits below, intensity by standard error — so a hundred and twenty lines can be read at a glance.</p>
+      </article>
+      <article>
+        <h3>The verdict</h3>
+        <p>For a rational the period is found and the densities are exact fractions, so the answer is a proof. For everything else it is a measurement on a prefix, and it is labelled as one.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 data-n="03">Why it is worth a table</h2>
+    <p class="lead">Normality is a statement about every string of every length, in every base: no finite computation settles it, and not one of the classical constants — \(\pi\), \(e\), \(\sqrt{2}\), \(\log 2\) — has ever been proved normal in a single base. Pseudonormality is what remains of normality once you insist on being able to check it.</p>
+    <p>Every normal number is pseudonormal, so a number that fails the test is not normal, full stop — and the failure is exhibited rather than asserted. The converse is false: there are rationals, normal in no base whatsoever, whose scheme is exactly the prescribed one. The test is a sieve and not a decision procedure, and a good part of the interest lies in seeing how fine a sieve it is.</p>
+    <p class="aside">The condition does become a characterisation once all bases are taken together: \(\omega\) is \(b\)-normal exactly when it is \(b^{n}\)-pseudonormal for every \(n\), and absolutely normal exactly when it is pseudonormal in every base. What is open is whether finitely many bases already suffice.</p>
+  </section>
+
+  <section class="block" id="colophon">
+    <h2 data-n="04">Colophon</h2>
+    <dl class="colophon">
+      <dt>Source</dt>
+      <dd>The definitions, the scheme and the results implemented here are those of <a href="https://arxiv.org/abs/2102.05925"><em>Normal and pseudonormal numbers</em></a>, by Nicolò Cangiotti and Daniele Taufer (arXiv:2102.05925).</dd>
+      <dt>Honesty</dt>
+      <dd>Digits of the constants are produced with exact integer arithmetic at a fixed scale, with guard digits — never with floating point. Rationals are expanded until the period closes, and then the answer is exact. Everything else is reported as an estimate on a prefix, with an error bar, because that is what it is.</dd>
+      <dt>Made of</dt>
+      <dd>Three HTML files, one stylesheet, five scripts and a vendored copy of MathJax. No framework, no build step, no network at runtime. Open <code>index.html</code> and it works.</dd>
+      <dt>Type</dt>
+      <dd>System serif for prose, system monospace for every numeral, Computer Modern for the formulas. Two palettes; two hues, both load-bearing.</dd>
+      <dt>Licence</dt>
+      <dd>MIT.</dd>
+    </dl>
+  </section>
+
+</main>
+
+<footer>
+  <span class="fmark">ABNORMAL</span>
+  <span><a href="https://arxiv.org/abs/2102.05925">arXiv:2102.05925</a></span>
+  <span>MIT</span>
+</footer>
+
+<script src="assets/js/shell.js"></script>
+<script id="MathJax-script" src="assets/vendor/tex-svg.js"></script>
+<script src="assets/js/hero.js"></script>
+<script>
+  PAGE.onTheme = () => initHero(document.getElementById('hero'));
+  document.addEventListener('DOMContentLoaded', () => {
+    bootShell();
+    initHero(document.getElementById('hero'));
+    let rt;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => initHero(document.getElementById('hero')), 200);
+    });
+  });
+</script>
+</body>
+</html>

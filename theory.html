@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABNORMAL — theory</title>
+<meta name="description" content="Normal, simply normal, Borel and pseudonormal numbers: the swap map, the six admissible digits of the difference, and the Δ_b-scheme.">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2316161a'/><path d='M32 13 L52 51 H12 Z' fill='none' stroke='%23c2402a' stroke-width='4' stroke-linejoin='round'/><circle cx='24' cy='42' r='3.6' fill='%23fbfaf8'/><circle cx='40' cy='42' r='3.6' fill='%23fbfaf8'/></svg>">
+<link rel="stylesheet" href="assets/css/abnormal.css">
+<script>document.documentElement.dataset.theme = (function(){try{return localStorage.getItem('abnormal-theme')||'light'}catch(e){return 'light'}})();</script>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { menuOptions: { settings: { inTabOrder: false } } },
+  };
+</script>
+</head>
+<body class="page-theory">
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <h1 class="wordmark" data-mark="4"><a href="index.html">ABNORMAL</a></h1>
+      <p class="expand">a finite test for an infinite property</p>
+    </div>
+    <div class="toggles">
+      <button id="themeBtn" class="toggle" type="button">dark</button>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="theory.html">Theory</a>
+      <a href="compute.html">Compute</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="block">
+    <h2 data-n="01">Normality <span class="tag">Borel, 1909</span></h2>
+
+    <p class="lead">Write a real number \(\omega\) in base \(b\). It is <b>simply \(b\)-normal</b> if each of the \(b\) digits occurs with density \(1/b\); it is <b>\(b\)-normal</b> if for every \(n\) each of the \(b^{n}\) strings of length \(n\) occurs with density \(b^{-n}\); and it is <b>absolutely normal</b> if it is \(b\)-normal for every base \(b \geq 2\).</p>
+
+    <p>Borel proved that almost every real number is absolutely normal: the exceptions form a set of Lebesgue measure zero. The proof is a Borel–Cantelli argument and exhibits nothing. More than a century later the situation is still the one that makes the subject peculiar — normality is generic, easy to prove for almost all numbers, and impossible to establish for any number anyone cares about. Nobody knows whether \(\pi\), \(e\), \(\sqrt{2}\) or \(\log 2\) is normal in a single base.</p>
+
+    <p>Explicit normal numbers do exist, and they are built rather than found. Champernowne's constant, the positive integers written out one after another,</p>
+
+    <div class="eqbox">\[ C_{10} \;=\; 0.1234567891011121314\ldots \]</div>
+
+    <p>is \(10\)-normal, and the same construction is \(b\)-normal in every base (Nakai–Shiokawa). Sierpiński produced an absolutely normal number in 1917; whether it could actually be computed had to wait until Becher and Figueira in 2002.</p>
+
+    <div class="thm">
+      <span class="head">Density need not exist</span>
+      <p>Before asking whether a density equals \(1/b\), one has to ask whether it exists. It need not. The number</p>
+      \[ \omega \;=\; \sum_{i=0}^{\infty}\left(\sum_{j=0}^{2^{2i}-1} b^{-j}\right) b^{-2^{2i}} \;=\; 0.\underbrace{1}_{1}\underbrace{00}_{2}\underbrace{1111}_{4}\underbrace{0\cdots0}_{8}\ldots \]
+      <p>has no density of zeros at all: the running frequency keeps oscillating for ever. Numbers for which every string of every length does have a density are the <b>Borel numbers</b>, written \(\mathcal{B}\), and everything below lives inside that class.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 data-n="02">Normality as independence</h2>
+
+    <p class="lead">For a Borel number the digit frequencies are an honest probability, and normality turns into a statement about randomness that is exactly what the intuition promises.</p>
+
+    <div class="thm">
+      <span class="head">Theorem</span>
+      <p>A Borel number \(\omega\) is \(b\)-normal if and only if it is simply \(b\)-normal <em>and</em> its digits are mutually stochastically independent:</p>
+      \[ \mathbb{P}\big([s_1,\ldots,s_n]\big) \;=\; \mathbb{P}\big([s_1]\big)\cdots\mathbb{P}\big([s_n]\big) \;=\; \frac{1}{b^{\,n}} . \]
+    </div>
+
+    <p>So the gap between simple normality and normality is precisely independence, and neither half implies the other. Independence alone is not enough — the digits of an integer are trivially independent, being all zero — and equidistribution alone is not enough either, as the Thue–Morse digits show: they are half zeros and half ones, and yet the string \(000\) never occurs.</p>
+
+    <p>Equivalently, \(\omega\) is \(b\)-normal exactly when it is <em>casually constructed</em>: the first digit is uniform and every digit is uniform given all the digits before it,</p>
+
+    <div class="eqbox">\[ \mathbb{P}\big([s_1]\big) = \frac{1}{b}, \qquad \mathbb{P}\big([s_n] \mid [s_1,\ldots,s_{n-1}]\big) = \frac{1}{b}. \]</div>
+
+    <p>A number generated by rolling a fair \(b\)-sided die is normal; one generated by a loaded die is not.</p>
+  </section>
+
+  <section class="block">
+    <h2 data-n="03">The swap map <span class="tag">\(\sigma^{i,j}_{(b)}\)</span></h2>
+
+    <p class="lead">Fix a base \(b\) and two digits \(i, j\). The <b>swap map</b> \(\sigma^{i,j}_{(b)}\) exchanges them everywhere in the base-\(b\) expansion of its argument, and the object of interest is the difference it produces:</p>
+
+    <div class="eqbox">\[ \Delta_b^{\,i,j}(\omega) \;=\; \omega - \sigma^{i,j}_{(b)}(\omega). \]</div>
+
+    <p>For example, on the first twenty decimal digits of \(\pi\),</p>
+
+    <div class="eqbox">\[ \begin{aligned}
+      \pi &= 3.14159265358979323846\ldots \\
+      \sigma^{1,5}_{(10)}(\pi) &= 3.54519261318979323846\ldots
+    \end{aligned} \]</div>
+
+    <p>The two numbers have the same digits in a different arrangement, so their difference could a priori be anything at all. It cannot.</p>
+
+    <div class="thm hot">
+      <span class="head">Lemma — only six digits survive</span>
+      <p>Let \(\delta = |i-j|\). Whatever \(\omega\) is, every digit of \(\Delta_b^{\,i,j}(\omega)\) lies in</p>
+      \[ \mathfrak{D} \;=\; \{\, \delta,\; b-\delta,\; \delta-1,\; b-\delta-1,\; b-1,\; 0 \,\} \pmod b . \]
+      <p>The reason is the arithmetic of borrows. The two expansions differ only at the positions carrying \(i\) or \(j\); those contribute \(\pm\delta\), and each negative contribution generates a borrow which travels leftwards until it meets a position of the other kind. A position of \(i\) yields \(\delta\) or \(\delta-1\), a position of \(j\) yields \(b-\delta\) or \(b-\delta-1\), and every position in between yields \(0\) or \(b-1\) according to whether a borrow is passing through it.</p>
+    </div>
+
+    <p>This is what the strip on the calculator page shows: two rows of full-alphabet noise, and underneath a row drawn from a handful of symbols.</p>
+  </section>
+
+  <section class="block">
+    <h2 data-n="04">The scheme <span class="tag">\(\Delta_b\)</span></h2>
+
+    <p class="lead">The <b>\(\Delta_b\)-scheme</b> of a number is the table of the densities of those digits, one line for each pair \(i \neq j\). If \(\omega\) is normal the borrows behave like coin tosses, and the whole table is forced.</p>
+
+    <div class="thm">
+      <span class="head">Proposition — every normal number has the same scheme</span>
+      <p>If \(\omega\) is \(b\)-normal then its \(\Delta_b\)-scheme depends on \(i\) and \(j\) only through \(\delta = |i-j|\), and each line reads</p>
+      \[ \mathbb{P}[\delta] = \mathbb{P}[b-\delta] = \mathbb{P}[\delta-1] = \mathbb{P}[b-\delta-1] = \frac{1}{2b}, \qquad
+         \mathbb{P}[b-1] = \mathbb{P}[0] = \frac{b-2}{2b}, \]
+      <p>where the probabilities of digits that coincide modulo \(b\) are added together.</p>
+    </div>
+
+    <p>Where the numbers come from: half the swapped positions carry \(i\) and half carry \(j\), and independently of that a borrow arrives half the time, which splits the density \(2/b\) of the swapped positions four ways and gives \(1/(2b)\) each. The remaining positions, of density \(1 - 2/b\), split evenly between \(0\) and \(b-1\).</p>
+
+    <p>A number whose scheme is this one is called <b>\(b\)-pseudonormal</b>, and the set of them is written \(\mathcal{D}_b\). Since the table has \(b(b-1)/2\) lines and each entry is a finite count, the condition can actually be tested — which normality cannot.</p>
+
+    <div class="thm">
+      <span class="head">Where pseudonormality sits</span>
+      <p>For every base \(b \neq 3\), and for Borel numbers,</p>
+      \[ \omega \ \text{casually constructed} \iff \omega \in \mathcal{N}_b \implies \omega \in \mathcal{D}_b \implies \omega \in \mathcal{S}_b , \]
+      <p>and both implications are strict:</p>
+      \[ \mathcal{N}_b \subsetneq \mathcal{D}_b \subsetneq \mathcal{S}_b \subsetneq \mathcal{B} \subsetneq \mathbb{R} . \]
+    </div>
+
+    <p>Strictness is not abstract. The rational number</p>
+
+    <div class="eqbox">\[ \frac{7930067}{16843009} \;=\; 0.\overline{1320201331020231}_{\,4} \]</div>
+
+    <p>has exactly the prescribed \(\Delta_4\)-scheme, and yet no rational is normal in any base: pseudonormal does not imply normal. In the other direction the periodic base-4 number \(0.\overline{33323130232221201312111003020100}\) is simply \(4\)-normal — it contains each digit, and indeed each pair of digits, equally often — but its lines for \((0,1)\) and \((1,2)\) disagree, so it is not \(4\)-pseudonormal.</p>
+
+    <div class="thm hot">
+      <span class="head">Base 3 is an exception</span>
+      <p>At \(b = 3\) the six admissible digits collapse onto one another for both values of \(\delta\), and the scheme degenerates into the single demand that the three digits of \(\Delta\) be equally likely. That is genuinely weaker than simple normality: the rational</p>
+      \[ \frac{3617}{265720} \;=\; 0.\overline{000100220221}_{\,3} \]
+      <p>is exactly \(3\)-pseudonormal while its digits have densities \(\tfrac{1}{2}, \tfrac{1}{6}, \tfrac{1}{3}\). In base 3, and only there, the two conditions are not comparable.</p>
+    </div>
+
+    <div class="thm">
+      <span class="head">Base 2 is degenerate</span>
+      <p>At \(b = 2\) the swap complements every digit, so \(\Delta\) is the expansion itself shifted by one place — possibly complemented — and its two densities are those of \(\omega\) in some order. Pseudonormality and simple normality then say exactly the same thing, and the calculator returns the same verdict for both. The Thue–Morse digits are the specimen to try: simply \(2\)-normal, \(2\)-pseudonormal, and not \(2\)-normal.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 data-n="05">All bases at once</h2>
+
+    <p class="lead">One base is not enough to recover normality. All the powers of one base are.</p>
+
+    <div class="thm">
+      <span class="head">Theorem</span>
+      <p>A Borel number \(\omega\) is \(b\)-normal if and only if it is \(b^{n}\)-pseudonormal for every \(n \geq 2\). Consequently</p>
+      \[ \omega \ \text{absolutely normal} \iff \omega \in \mathcal{D}_b \ \text{ for every } b \in \mathbb{N}_{>1} . \]
+    </div>
+
+    <p>The argument is short: pseudonormality in a base \(b^{n} \geq 4\) forces simple normality in that base, and by Pillai's classical characterisation simple normality in every base \(b^{n}\) is the same thing as normality in base \(b\). The exceptional base 3 never appears, since \(b^{n} \geq 4\) as soon as \(n \geq 2\).</p>
+
+    <p>So pseudonormality is strictly weaker than normality in each single base and exactly equivalent to it across all of them. What remains open is the quantitative question, which is the one that matters if the test is to be used in practice: is there a <em>finite</em> set of bases whose schemes already force normality, or can a non-normal number fake the first \(N\) of them for every \(N\)?</p>
+
+    <p class="aside">Everything on this page follows <a href="https://arxiv.org/abs/2102.05925"><em>Normal and pseudonormal numbers</em></a> by Nicolò Cangiotti and Daniele Taufer (arXiv:2102.05925). The calculator is an independent implementation: it computes the schemes from the definitions, and contains no stored answers.</p>
+  </section>
+
+</main>
+
+<footer>
+  <span class="fmark">ABNORMAL</span>
+  <span><a href="https://arxiv.org/abs/2102.05925">arXiv:2102.05925</a></span>
+  <span>MIT</span>
+</footer>
+
+<script src="assets/js/shell.js"></script>
+<script id="MathJax-script" src="assets/vendor/tex-svg.js"></script>
+<script>document.addEventListener('DOMContentLoaded', bootShell);</script>
+</body>
+</html>
