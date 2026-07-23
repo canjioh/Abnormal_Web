@@ -117,54 +117,54 @@ function pseudorandom(b, n, seed) {
          'rational' — exact long division, period detected when it closes
 
    The caps are measured, not guessed. A digit generator is linear and will
-   hand over twenty million digits in about a second; a series at that scale is
-   BigInt-bound and would take the better part of an hour, so the constants
-   stop where the wait is still honest. */
+   hand over twenty million digits in about a second; a series is BigInt-bound
+   and heavy, so the analytic constants stop at two million — a run of tens of
+   seconds that pauses the tab while it computes. */
 const LIBRARY = [
   {
-    id: 'pi', name: 'π', group: 'Constants', max: 250000,
+    id: 'pi', name: 'π', group: 'Constants', max: 2000000,
     note: 'Believed normal in every base; not proved in any.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(piScaled(S), S, b, n); },
   },
   {
-    id: 'e', name: 'e', group: 'Constants', max: 250000,
+    id: 'e', name: 'e', group: 'Constants', max: 2000000,
     note: 'Believed normal; not proved.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(eScaled(S), S, b, n); },
   },
   {
-    id: 'ln2', name: 'log 2', group: 'Constants', max: 250000,
+    id: 'ln2', name: 'log 2', group: 'Constants', max: 2000000,
     note: 'Believed normal; not proved.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(ln2Scaled(S), S, b, n); },
   },
   {
-    id: 'sqrt2', name: '√2', group: 'Constants', max: 250000,
+    id: 'sqrt2', name: '√2', group: 'Constants', max: 2000000,
     note: 'Algebraic irrational. No algebraic irrational has ever been proved normal in any base.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(2n * S * S), S, b, n); },
   },
   {
-    id: 'sqrt3', name: '√3', group: 'Constants', max: 250000,
+    id: 'sqrt3', name: '√3', group: 'Constants', max: 2000000,
     note: 'Algebraic irrational.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(3n * S * S), S, b, n); },
   },
   {
-    id: 'sqrt5', name: '√5', group: 'Constants', max: 250000,
+    id: 'sqrt5', name: '√5', group: 'Constants', max: 2000000,
     note: 'Algebraic irrational.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(isqrt(5n * S * S), S, b, n); },
   },
   {
-    id: 'cbrt2', name: '∛2', group: 'Constants', max: 250000,
+    id: 'cbrt2', name: '∛2', group: 'Constants', max: 2000000,
     note: 'Algebraic of degree three.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits(iroot(2n * S * S * S, 3), S, b, n); },
   },
   {
-    id: 'phi', name: 'φ', group: 'Constants', max: 250000,
+    id: 'phi', name: 'φ', group: 'Constants', max: 2000000,
     note: 'The golden ratio, (1+√5)/2.',
     kind: 'series', f: (b, n) => { const S = scaleFor(b, n); return scaledToDigits((S + isqrt(5n * S * S)) / 2n, S, b, n); },
   },
 
   {
     id: 'champernowne', name: 'Champernowne C_b', group: 'Proved normal', max: 20000000,
-    note: 'Proved b-normal (Champernowne 1933; Nakai–Shiokawa 1992 in every base) — but it converges so slowly that the test rejects it at any prefix length you can compute here. Normality is an asymptotic statement; this is what that costs.',
+    note: 'Proved b-normal (Champernowne 1933; Nakai–Shiokawa 1992 in every base), yet its finite prefixes do not look normal at all: the digit frequencies oscillate with where you stop. Cut inside the 7-digit numbers, as 20M does, and the leading digits 1 and 2 are heavily over-counted. Normality is a statement about the limit, and this is the textbook case of a prefix disagreeing with it — not a bug.',
     kind: 'digits', f: champernowne,
   },
   {

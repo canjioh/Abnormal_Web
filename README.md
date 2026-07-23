@@ -138,9 +138,9 @@ beforehand what it is going to cost.
 The caps in the menu are measured, not guessed, and they differ by kind. A digit
 generator is linear and hands over twenty million digits in about a second; the
 long division for a rational is nearly as fast. The analytic constants are
-BigInt-bound and stop at **250 000** digits, which is a few seconds — twenty
-million of them would be the better part of an hour, and pretending otherwise
-would only produce a frozen tab.
+BigInt-bound and stop at **2 million** digits — a run of tens of seconds that
+pauses the tab while it computes; twenty million would be minutes, and
+pretending otherwise would only produce a frozen tab.
 
 The series are summed by binary splitting rather than term by term. Adding terms
 one at a time is quadratic and puts a ceiling of a few thousand digits on the

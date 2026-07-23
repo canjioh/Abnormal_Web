@@ -168,9 +168,16 @@ function syncDigits() {
   const warn = el('slowNote');
   if (!warn) return;
 
-  if (spec && spec.kind === 'series' && n > spec.max) {
-    warn.textContent = `${spec.name} is computed exactly and stops at ${fmtDigits(spec.max)} digits — ` +
-      `a series at ${fmtDigits(n)} would take the better part of an hour. The run will use ${fmtDigits(spec.max)}.`;
+  if (spec && spec.kind === 'series') {
+    if (n > spec.max) {
+      warn.textContent = `${spec.name} is computed exactly and stops at ${fmtDigits(spec.max)} digits — ` +
+        `a series much beyond that takes minutes and freezes the tab. The run will use ${fmtDigits(spec.max)}.`;
+    } else if (n >= 500000) {
+      warn.textContent = `${spec.name} is computed exactly: at ${fmtDigits(n)} digits this is a heavy BigInt run ` +
+        'that pauses the tab for tens of seconds while it computes.';
+    } else {
+      warn.textContent = '';
+    }
     return;
   }
   const secs = estimateSeconds(b, n);
@@ -236,7 +243,9 @@ async function doRun() {
 
   const t0 = performance.now();
 
-  setProgress(0.02, 'producing the digits');
+  const spec = libraryById(UI.source.value);
+  const heavy = spec && spec.kind === 'series' && Math.min(n, spec.max) >= 500000;
+  setProgress(0.02, heavy ? 'computing the constant — the tab pauses here for a bit' : 'producing the digits');
   await new Promise((r) => setTimeout(r, 0));
   const built = buildSource(b, n);
   const source = built.source;

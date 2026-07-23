@@ -445,7 +445,11 @@ mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
   text-transform: uppercase;
   color: var(--mid);
 }
-.echo { color: var(--hot); font-weight: 700; }
+/* The label words are set upper-case for style, but a base is the letter b and
+   a standard error is a lower-case σ; upper-casing them would turn b into B and
+   σ into Σ (summation), which is a different symbol. Mathematics keeps its case. */
+.ctrl label i, .ctrl label .echo, .ctrl label .var { text-transform: none; }
+.echo { color: var(--hot); font-weight: 700; text-transform: none; }
 .inline { display: flex; gap: 0.55rem; align-items: center; flex-wrap: wrap; }
 .inline .slider { flex: 1 1 7rem; min-width: 0; }
 .row-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-top: 0.3rem; }
