@@ -738,6 +738,54 @@ table.kv td { font-family: var(--mono); font-size: 0.85rem; padding: 0.35rem 0; 
 .barval .dev.over { color: var(--hot-ink); }
 .barval .dev.under { color: var(--cool-ink); }
 
+/* ---------- set diagram ---------- */
+
+.setfig { margin: 1.8rem 0; max-width: 100%; }
+/* direct child only: MathJax renders each inline formula as a nested <svg>,
+   and a bare `.setfig svg` would stretch those to full width too. */
+.setfig > svg { width: 100%; height: auto; display: block; }
+.setfig > svg .ring ellipse {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.setfig > svg .ring.cool ellipse { fill: color-mix(in srgb, var(--cool) 9%, transparent); stroke: var(--cool); }
+.setfig > svg .ring.hot ellipse { fill: color-mix(in srgb, var(--hot) 13%, transparent); stroke: var(--hot); }
+.setfig > svg .ring text {
+  font-family: var(--serif);
+  font-size: 27px;
+  fill: var(--ink);
+}
+.setfig > svg .ring.cool text { fill: var(--cool-ink); }
+.setfig > svg .ring.hot text { fill: var(--hot-ink); }
+.setfig > svg .ring text .sub { font-size: 17px; }
+.setfig figcaption {
+  font-size: 0.86rem;
+  color: var(--mid);
+  margin-top: 0.7rem;
+  max-width: var(--measure);
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* the rings settle in one after another when the figure scrolls into view */
+.setfig .ring {
+  opacity: 0;
+  transform: scale(0.9);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 620ms ease, transform 620ms cubic-bezier(.2,.7,.2,1);
+  transition-delay: calc(var(--i) * 180ms);
+}
+.setfig.in .ring { opacity: 1; transform: none; }
+.setfig figcaption { opacity: 0; transition: opacity 500ms ease 1s; }
+.setfig.in figcaption { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .setfig .ring, .setfig figcaption { opacity: 1; transform: none; transition: none; }
+}
+
 /* ---------- footer ---------- */
 
 footer {

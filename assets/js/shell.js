@@ -79,6 +79,33 @@ function typesetMath(nodes, tries) {
   return MathJax.startup.promise;
 }
 
+/* Reveal any .reveal element once it scrolls into view. Deliberately built on
+   getBoundingClientRect and a scroll listener rather than IntersectionObserver:
+   the observer depends on the compositing pipeline and silently never fires in
+   a throttled or non-painting tab, which would leave the content invisible.
+   Layout geometry is always available, so this cannot strand anything off. */
+function initReveals() {
+  let pending = [...document.querySelectorAll('.reveal')];
+  if (!pending.length) return;
+  if (reducedMotion()) { pending.forEach((el) => el.classList.add('in')); return; }
+
+  const check = () => {
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    pending = pending.filter((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < vh * 0.85 && r.bottom > 0) { el.classList.add('in'); return false; }
+      return true;
+    });
+    if (!pending.length) {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    }
+  };
+  window.addEventListener('scroll', check, { passive: true });
+  window.addEventListener('resize', check);
+  check();
+}
+
 function bootShell() {
   let stored = 'light';
   try { stored = localStorage.getItem('abnormal-theme') || 'light'; } catch (e) { /* ignore */ }
@@ -93,4 +120,6 @@ function bootShell() {
       if (typeof PAGE.onTheme === 'function') PAGE.onTheme();
     });
   }
+
+  initReveals();
 }

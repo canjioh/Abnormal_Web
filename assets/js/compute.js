@@ -344,6 +344,14 @@ function fromRational(p, q, b, n, label) {
 
 function fmt(x, k) { return x.toFixed(k === undefined ? 5 : k); }
 
+/* Below ten seconds the reader wants milliseconds; above it, seconds are the
+   unit that means something. */
+function fmtTime(ms) {
+  if (ms < 10000) return `${Math.round(ms)} ms`;
+  const s = ms / 1000;
+  return s < 60 ? `${s.toFixed(1)} s` : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`;
+}
+
 /* A standard-error count can be genuinely infinite: when every batch agrees
    exactly and the value is still wrong — the digits the lemma forbids, for
    instance — no amount of data would explain the gap. Printing "Infinity"
@@ -378,7 +386,7 @@ function renderVerdict() {
     <div class="cell"><span class="k">${b}-pseudonormal</span>${flag(an.pseudonormal)}</div>
     <div class="cell"><span class="k">largest deviation</span><span class="v small">${fmt(an.maxDev, 6)}${an.exact ? '' : ` &nbsp;=&nbsp; ${fmtZ(an.maxZ)} σ`}</span></div>
     <div class="cell"><span class="k">spread within a δ class</span><span class="v small">${fmt(an.spread, 6)}${an.spreadDelta > 0 ? ` (δ = ${an.spreadDelta})` : ''}</span></div>
-    <div class="cell"><span class="k">computed in</span><span class="v small">${ms.toFixed(0)} ms</span></div>
+    <div class="cell"><span class="k">computed in</span><span class="v small">${fmtTime(ms)}</span></div>
   `;
 
   const note = el('verdictNote');

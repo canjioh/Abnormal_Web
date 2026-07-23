@@ -164,7 +164,7 @@ const LIBRARY = [
 
   {
     id: 'champernowne', name: 'Champernowne C_b', group: 'Proved normal', max: 20000000,
-    note: 'Proved b-normal (Champernowne 1933; Nakai–Shiokawa 1992 in every base), yet its finite prefixes do not look normal at all: the digit frequencies oscillate with where you stop. Cut inside the 7-digit numbers, as 20M does, and the leading digits 1 and 2 are heavily over-counted. Normality is a statement about the limit, and this is the textbook case of a prefix disagreeing with it — not a bug.',
+    note: 'Proved b-normal (Champernowne 1933; Nakai–Shiokawa 1992 in every base), yet its finite prefixes never pass: the digit frequencies oscillate with where you stop, and the scheme deviation shrinks only like 1/log(N). Extrapolating the measured rate, it would take on the order of 10^50 digits to enter the passing range — more than there are atoms in the observable universe. It is normal in the limit and unreachable in practice: the textbook case of a prefix disagreeing with the theorem, not a bug.',
     kind: 'digits', f: champernowne,
   },
   {

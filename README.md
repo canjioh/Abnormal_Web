@@ -83,8 +83,12 @@ evidence and never a proof.
 Two consequences worth knowing before reading a verdict as a result:
 
 * **Slow convergence is real.** Champernowne and Copeland–Erdős are *proved*
-  normal and still fail the test at any prefix length you can compute in a
-  browser. Normality is asymptotic; the scheme measures a rate.
+  normal and still fail the test at every prefix length. Champernowne's scheme
+  deviation shrinks only like 1/log(N): extrapolating the measured rate, it
+  would take on the order of 10^50 digits to enter the passing range — more than
+  the atoms in the observable universe. Normal in the limit, unreachable in
+  practice. It is the sharpest illustration of why the test can only speak of
+  prefixes.
 * **Base 2 is degenerate** — pseudonormality and simple normality coincide —
   and **base 3 is exceptional**: the scheme collapses to "the three digits of Δ
   are equally likely", which is strictly weaker than simple normality. The
